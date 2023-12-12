@@ -1,20 +1,51 @@
- using System.Collections;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public Action OnPowerUpStart;
+    public Action OnPowerUpStop;
+
     [SerializeField] private float speed = 0;
     [SerializeField] private Camera camera;
+    [SerializeField] private float powerUpDuration;
 
     private Rigidbody playerRb;
+    private Coroutine powerUpCoroutine;
 
-    private void Awake() {
+    public void PickPowerUp()
+    {
+        // pastikan stop jika ada coroutine yg sedang berjalan
+        if (powerUpCoroutine != null)
+        {
+            StopCoroutine(powerUpCoroutine);
+        }
+        powerUpCoroutine = StartCoroutine(StartPowerUp());
+    }
+    
+    private IEnumerator StartPowerUp()
+    {
+        if (OnPowerUpStart != null)
+        {
+            OnPowerUpStart();
+        }
+        yield return new WaitForSeconds(powerUpDuration);
+        if (OnPowerUpStop != null)
+        {
+            OnPowerUpStop();
+        }
+    }
+
+    private void Awake()
+    {
         playerRb = GetComponent<Rigidbody>();
         HideLockCursor();
     }
 
-    private void HideLockCursor() {
+    private void HideLockCursor()
+    {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
