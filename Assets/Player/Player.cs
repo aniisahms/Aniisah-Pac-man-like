@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -11,9 +12,28 @@ public class Player : MonoBehaviour
     [SerializeField] private float speed = 0;
     [SerializeField] private Camera camera;
     [SerializeField] private float powerUpDuration;
+    [SerializeField] private int health;
+    [SerializeField] private TMP_Text healthText;
+    [SerializeField] private Transform respawnPoint;
 
     private Rigidbody playerRb;
     private Coroutine powerUpCoroutine;
+    private bool isPowerUpActive = false;
+
+    public void Dead()
+    {
+        health -= 1;
+        if (health > 0)
+        {
+            transform.position = respawnPoint.position;
+        }
+        else
+        {
+            health = 0;
+            Debug.Log("Lose.");
+        }
+        UpdateUI();
+    }
 
     public void PickPowerUp()
     {
@@ -27,11 +47,15 @@ public class Player : MonoBehaviour
     
     private IEnumerator StartPowerUp()
     {
+        isPowerUpActive = true;
         if (OnPowerUpStart != null)
         {
             OnPowerUpStart();
         }
+
         yield return new WaitForSeconds(powerUpDuration);
+        isPowerUpActive = false;
+
         if (OnPowerUpStop != null)
         {
             OnPowerUpStop();
@@ -40,6 +64,7 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        UpdateUI();
         playerRb = GetComponent<Rigidbody>();
         HideLockCursor();
     }
@@ -50,7 +75,6 @@ public class Player : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    // Update is called once per frame
     private void Update()
     {
         // Input axis
@@ -71,5 +95,21 @@ public class Player : MonoBehaviour
 
         // movement
         playerRb.velocity = movementDirection * speed * Time.fixedDeltaTime;
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if (isPowerUpActive)
+        {
+            if (other.gameObject.CompareTag("Enemy"))
+            {
+                other.gameObject.GetComponent<Enemy>().Dead();
+            }
+        }
+    }
+
+    private void UpdateUI()
+    {
+        healthText.text = "Health: " + health;
     }
 }

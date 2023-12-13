@@ -6,6 +6,7 @@ public class RetreatState : BaseState
 {
     public void EnterState(Enemy enemy)
     {
+        enemy.animator.SetTrigger("RetreatState");
         Debug.Log("Start retreat.");
     }
 
