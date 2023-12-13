@@ -9,9 +9,12 @@ public class PatrolState : BaseState
 
     public void EnterState(Enemy enemy)
     {
-        isMoving = false;
-        enemy.animator.SetTrigger("PatrolState");
-        Debug.Log("Start patrol.");
+        if (enemy != null)
+        {
+            isMoving = false;
+            enemy.animator.SetTrigger("PatrolState");
+            Debug.Log("Start patrol.");
+        }
     }
 
     public void UpdateState(Enemy enemy)
